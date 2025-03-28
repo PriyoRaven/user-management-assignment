@@ -1,9 +1,9 @@
 // src/components/Login.jsx
 // This file contains the login form component.
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { login } from "../services/api";
-import { setToken } from "../utils/auth";
+import { setToken, setAuthHistory } from "../utils/auth";
 import { useNavigate } from "react-router-dom";
 import Button from "./ui/Button.jsx";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -14,6 +14,11 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
   const [error, setError] = useState(""); // Error message
   const navigate = useNavigate(); // Navigation object
+
+  // Clear any logged out state when viewing login page
+  useEffect(() => {
+    sessionStorage.removeItem("loggedOut");
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -39,7 +44,8 @@ const Login = () => {
     try {
       const response = await login(email, password);
       setToken(response.token); // Store token with expiration
-      navigate("/users");
+      setAuthHistory(); // Set authentication history state
+      navigate("/users", { replace: true });
     } catch (err) {
       if (err.error === "user not found") {
         setError("Invalid email");

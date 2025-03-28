@@ -24,13 +24,31 @@ export const getToken = () => {
 
 export const removeToken = () => {
   localStorage.removeItem("authData");
+  // When we remove the token, mark that we've done a logout
+  sessionStorage.setItem("loggedOut", "true");
 };
 
 export const isAuthenticated = () => {
+  // Check if we've explicitly logged out in this session
+  if (sessionStorage.getItem("loggedOut") === "true") {
+    return false;
+  }
   return !!getToken();
 };
 
 export const logout = () => {
   removeToken();
-  window.location.href = "/";
+  // Use replace instead of href to prevent back button navigation
+  window.location.replace("/");
+};
+
+// Add a history state to indicate authentication
+export const setAuthHistory = () => {
+  // This adds a state object that we can check when history navigation occurs
+  window.history.replaceState({ authenticated: true }, "");
+};
+
+// Clear auth history state
+export const clearAuthHistory = () => {
+  window.history.replaceState({ authenticated: false }, "");
 };

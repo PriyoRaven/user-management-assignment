@@ -1,14 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
+  useNavigate,
+  useLocation,
 } from "react-router-dom";
 import Login from "./components/Login";
 import UserList from "./components/UserList";
 import EditUser from "./components/EditUser";
-import { isAuthenticated, logout } from "./utils/auth";
+import {
+  isAuthenticated,
+  logout,
+  setAuthHistory,
+  clearAuthHistory,
+} from "./utils/auth";
 import Button from "./components/ui/Button";
 import { UserProvider, useUserContext } from "./context/UserContext";
 import ConfirmSelect from "./components/ui/ConfirmSelect";
@@ -21,6 +28,7 @@ const Header = () => {
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const handleLogout = () => {
+    clearAuthHistory(); // Clear auth history state
     logout();
     window.location.href = "/";
   };
@@ -87,9 +95,47 @@ const Header = () => {
   );
 };
 
+// AuthCheck component to handle history navigation
+const AuthCheck = ({ children }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Check authentication on every render and location change
+    if (!isAuthenticated()) {
+      // Redirect to login if not authenticated
+      navigate("/", { replace: true });
+    } else {
+      // Set auth history state when authenticated
+      setAuthHistory();
+    }
+
+    // Add popstate event listener to handle back/forward navigation
+    const handlePopState = (event) => {
+      if (!isAuthenticated()) {
+        navigate("/", { replace: true });
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [navigate, location]);
+
+  return children;
+};
+
 // PrivateRoute component to protect routes
 const PrivateRoute = ({ children }) => {
-  return isAuthenticated() ? (
+  if (!isAuthenticated()) {
+    // Clear any session data on initial check
+    sessionStorage.removeItem("loggedOut");
+    return <Navigate to="/" replace />;
+  }
+
+  return (
     <div
       className="flex flex-col min-h-screen bg-cover bg-center bg-fixed"
       style={{
@@ -97,12 +143,23 @@ const PrivateRoute = ({ children }) => {
           "url('https://wallpapercat.com/w/full/4/6/f/1228445-2309x1299-desktop-hd-good-luck-background-photo.jpg')",
       }}
     >
-      <Header />
-      <div className="flex-1">{children}</div>
+      <AuthCheck>
+        <Header />
+        <div className="flex-1">{children}</div>
+      </AuthCheck>
     </div>
-  ) : (
-    <Navigate to="/" />
   );
+};
+
+// LoginWrapper to clear logout flag when accessing login page
+const LoginWrapper = () => {
+  useEffect(() => {
+    // Clear the logged out flag when user intentionally goes to login page
+    sessionStorage.removeItem("loggedOut");
+    clearAuthHistory();
+  }, []);
+
+  return <Login />;
 };
 
 // App component with routes
@@ -111,7 +168,7 @@ function App() {
     <Router>
       <UserProvider>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<LoginWrapper />} />
           <Route
             path="/users"
             element={
@@ -128,6 +185,8 @@ function App() {
               </PrivateRoute>
             }
           />
+          {/* Catch all route for any other paths */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </UserProvider>
     </Router>
