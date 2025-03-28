@@ -2,7 +2,7 @@
 
 A modern React application for user management with authentication, display, filtering, and CRUD operations.
 
-![User Management Application](https://wallpapercat.com/w/full/4/6/f/1228445-2309x1299-desktop-hd-good-luck-background-photo.jpg)
+![User Management Application](https://i.pinimg.com/736x/f1/c7/52/f1c752ae6448d5b2546f0034a723366e.jpg)
 
 ## Table of Contents
 
@@ -21,6 +21,7 @@ A modern React application for user management with authentication, display, fil
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#faq)
 - [License](#license)
+- [Extra Detail](#extra-detail)
 
 ## Features
 
@@ -218,3 +219,10 @@ A: The authentication is implemented for demonstration purposes. In a production
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Extra Detail
+
+This project is done on React by using Vite tooling only for the reason of slow server start in react. Vite improves the dev server start time by first dividing the modules in an application into two categories: dependencies and source code.
+> Dependencies are mostly plain JavaScript that do not change often during development.
+> Source code often contains non-plain JavaScript that needs transforming, and will be edited very often. Also, not all source code needs to be loaded at the same time (e.g. with route-based code-splitting).
+> For more information on vite please refer to https://vite.dev/
