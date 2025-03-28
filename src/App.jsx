@@ -15,6 +15,7 @@ import {
   logout,
   setAuthHistory,
   clearAuthHistory,
+  setupVisibilityCheck,
 } from "./utils/auth";
 import Button from "./components/ui/Button";
 import { UserProvider, useUserContext } from "./context/UserContext";
@@ -100,38 +101,62 @@ const AuthCheck = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Run authentication check on component mount
   useEffect(() => {
-    // Check authentication on every render and location change
-    if (!isAuthenticated()) {
-      // Redirect to login if not authenticated
-      navigate("/", { replace: true });
-    } else {
-      // Set auth history state when authenticated
-      setAuthHistory();
-    }
+    const checkAuth = () => {
+      if (!isAuthenticated()) {
+        // Redirect to login if not authenticated
+        navigate("/", { replace: true });
+      } else {
+        // Set auth history state when authenticated
+        setAuthHistory();
+      }
+    };
+    checkAuth();
 
     // Add popstate event listener to handle back/forward navigation
-    const handlePopState = (event) => {
-      if (!isAuthenticated()) {
-        navigate("/", { replace: true });
-      }
+    const handlePopState = () => {
+      checkAuth();
     };
 
     window.addEventListener("popstate", handlePopState);
 
+    // Handle when user returns to the tab
+    setupVisibilityCheck();
+
+    // Add beforeunload event listener to help with page refresh cases
+    const handleBeforeUnload = () => {
+      // This sets a flag that we're navigating away, helping distinguish
+      // between refresh and back button in some browsers (chromium based mostly)
+      sessionStorage.setItem("pageRefreshing", "true");
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Clear the refresh flag since we're still in the app
+    sessionStorage.removeItem("pageRefreshing");
+
+    // Re-run auth check whenever location changes
+    checkAuth();
+
     return () => {
       window.removeEventListener("popstate", handlePopState);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [navigate, location]);
+
+  // Run auth check when the component renders and whenever location changes
+  if (!isAuthenticated()) {
+    return <Navigate to="/" replace />;
+  }
 
   return children;
 };
 
 // PrivateRoute component to protect routes
 const PrivateRoute = ({ children }) => {
+  // Check authentication immediately before rendering
   if (!isAuthenticated()) {
-    // Clear any session data on initial check
-    sessionStorage.removeItem("loggedOut");
     return <Navigate to="/" replace />;
   }
 
@@ -164,6 +189,15 @@ const LoginWrapper = () => {
 
 // App component with routes
 function App() {
+  // Run auth check on initial load
+  useEffect(() => {
+    // Check if user is on a protected route but not authenticated
+    const isProtectedRoute = window.location.pathname !== "/";
+    if (isProtectedRoute && !isAuthenticated()) {
+      window.location.replace("/");
+    }
+  }, []);
+
   return (
     <Router>
       <UserProvider>
