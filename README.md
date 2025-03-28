@@ -41,7 +41,7 @@ A modern React application for user management with authentication, display, fil
 ## Prerequisites
 
 - Node.js (v18 or higher)
-- npm (v9 or higher) or yarn (v1.22 or higher)
+- npm (v9 or higher)
 
 ## Installation
 
@@ -56,16 +56,12 @@ cd user-management-assignment
 
 ```bash
 npm install
-# or
-yarn
 ```
 
 3. Start the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
 ```
 
 4. Open your browser and visit `http://localhost:3000`
