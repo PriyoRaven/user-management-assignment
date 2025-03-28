@@ -1,3 +1,6 @@
+// src/components/ui/Button.jsx
+// This component displays a button with different variants, sizes and also loading states.
+
 import React from "react";
 
 const Button = ({
@@ -38,7 +41,8 @@ const Button = ({
     if (variant === "danger")
       classes += "bg-red-500 text-white hover:bg-red-600 ";
     if (variant === "success")
-      classes += "bg-green-500 text-white hover:bg-green-600 ";
+      classes +=
+        "bg-transparent border-green-500 text-black hover:bg-green-500 hover:text-white ";
     if (variant === "warning")
       classes += "bg-yellow-500 text-white hover:bg-yellow-600 ";
     if (variant === "transparent")

@@ -1,3 +1,6 @@
+// src/components/Login.jsx
+// This file contains the login form component.
+
 import React, { useState } from "react";
 import { login } from "../services/api";
 import { setToken } from "../utils/auth";
@@ -21,9 +24,15 @@ const Login = () => {
       return;
     }
 
-    // For this test API, we require specifically "cityslicka" as password and more than 6 characters
+    // First checking the minimum length
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
+      return;
+    }
+
+    // Then checking for specific password
+    if (password !== "cityslicka") {
+      setError("Invalid password - hint: use 'cityslicka'");
       return;
     }
 
@@ -34,10 +43,7 @@ const Login = () => {
     } catch (err) {
       if (err.error === "user not found") {
         setError("Invalid email");
-      } else if (
-        err.error === "invalid password" ||
-        password !== "cityslicka"
-      ) {
+      } else if (err.error === "invalid password") {
         setError("Invalid password - hint: use 'cityslicka'");
       } else {
         setError("Invalid login credentials");
@@ -76,7 +82,7 @@ const Login = () => {
         />
         <div className="relative">
           <input
-            type={showPassword ? "text" : "password"} // Toggle input type
+            type={showPassword ? "text" : "password"} // To toggle the input type
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
@@ -85,7 +91,7 @@ const Login = () => {
           />
           <button
             type="button"
-            onClick={() => setShowPassword(!showPassword)} // Toggle visibility
+            onClick={() => setShowPassword(!showPassword)} // To toggle visibility
             className="absolute right-3 top-3 text-gray-600 cursor-pointer"
           >
             {showPassword ? <FaEyeSlash /> : <FaEye />}

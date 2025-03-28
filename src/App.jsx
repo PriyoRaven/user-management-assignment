@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -11,31 +11,79 @@ import EditUser from "./components/EditUser";
 import { isAuthenticated, logout } from "./utils/auth";
 import Button from "./components/ui/Button";
 import { UserProvider, useUserContext } from "./context/UserContext";
+import ConfirmSelect from "./components/ui/ConfirmSelect";
+import { FaSearch } from "react-icons/fa";
 
-// Header component with logout button
+// Header component with logout button and search bar
 const Header = () => {
-  const { resetData } = useUserContext();
+  const { resetData, searchTerm, setSearchTerm } = useUserContext();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const handleLogout = () => {
     logout();
     window.location.href = "/";
   };
 
-  return (
-    <header className="bg-black/80 backdrop-blur-md p-4 sticky top-0 z-10 w-full">
-      <div className="flex justify-between items-center max-w-7xl mx-auto">
-        <div className="text-white text-xl font-bold mr-4">Users List</div>
+  const handleResetData = () => {
+    resetData();
+    setShowResetConfirm(false);
+  };
 
-        <div className="flex items-center space-x-4">
-          <Button onClick={() => resetData()} variant="primary" size="small">
-            Reset Data
-          </Button>
-          <Button onClick={handleLogout} variant="danger" size="small">
-            Logout
-          </Button>
+  const handleLogoutClick = (e) => {
+    e.stopPropagation();
+    setShowLogoutConfirm(true);
+  };
+
+  const handleResetClick = (e) => {
+    e.stopPropagation();
+    setShowResetConfirm(true);
+  };
+
+  return (
+    <>
+      <header className="bg-black/80 backdrop-blur-md px-2 lg:px-20 py-2 sticky top-0 z-10 w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-center max-w-screen mx-auto gap-2">
+          <div className="text-white text-xl font-bold">Users List</div>
+
+          <div className="relative w-full sm:max-w-xs">
+            <input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-4 py-2 w-full rounded-full bg-white/20 border border-white/30 text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-white/50"
+            />
+            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/70" />
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <Button onClick={handleResetClick} variant="primary" size="small">
+              Reset Data
+            </Button>
+            <Button onClick={handleLogoutClick} variant="danger" size="small">
+              Logout
+            </Button>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      {/* Logout Confirmation Dialog */}
+      <ConfirmSelect
+        isOpen={showLogoutConfirm}
+        message="Are you sure you want to logout?"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
+
+      {/* Reset Data Confirmation Dialog */}
+      <ConfirmSelect
+        isOpen={showResetConfirm}
+        message="Are you sure you want to reset all data? This action cannot be undone."
+        onConfirm={handleResetData}
+        onCancel={() => setShowResetConfirm(false)}
+      />
+    </>
   );
 };
 

@@ -1,7 +1,11 @@
+// src/components/EditUser.jsx
+// This component allows the user to edit a user's information.
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Button from "./ui/Button.jsx";
 import { useUserContext } from "../context/UserContext";
+import ConfirmSelect from "./ui/ConfirmSelect.jsx";
 
 const EditUser = () => {
   const { id } = useParams();
@@ -10,14 +14,15 @@ const EditUser = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const user = getUserById(parseInt(id));
-
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
     email: "",
   });
+
+  const user = getUserById(parseInt(id));
 
   useEffect(() => {
     if (user) {
@@ -34,8 +39,7 @@ const EditUser = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSaveConfirm = async () => {
     setIsLoading(true);
     setError("");
 
@@ -47,11 +51,23 @@ const EditUser = () => {
       console.error("Error updating user:", error);
     } finally {
       setIsLoading(false);
+      setShowSaveConfirm(false);
     }
   };
 
-  const handleCancel = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setShowSaveConfirm(true);
+  };
+
+  const handleCancelConfirm = () => {
     navigate("/users");
+  };
+
+  const handleCancelClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowCancelConfirm(true);
   };
 
   if (!user) {
@@ -124,7 +140,7 @@ const EditUser = () => {
           <div className="flex justify-between">
             <Button
               type="button"
-              onClick={handleCancel}
+              onClick={handleCancelClick}
               variant="secondary"
               size="medium"
             >
@@ -142,6 +158,22 @@ const EditUser = () => {
           </div>
         </form>
       </div>
+
+      {/* Save Confirmation Dialog */}
+      <ConfirmSelect
+        isOpen={showSaveConfirm}
+        message="Are you sure you want to save these changes?"
+        onConfirm={handleSaveConfirm}
+        onCancel={() => setShowSaveConfirm(false)}
+      />
+
+      {/* Cancel Confirmation Dialog */}
+      <ConfirmSelect
+        isOpen={showCancelConfirm}
+        message="Are you sure you want to cancel? Any unsaved changes will be lost."
+        onConfirm={handleCancelConfirm}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
     </div>
   );
 };
