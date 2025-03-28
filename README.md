@@ -37,7 +37,7 @@ A modern React application for user management with authentication, display, fil
 
 ## Live Demo
 
-[Live Link](https://user-management-assignment-beta.vercel.app/)
+[Live Link](https://user-management-assignment-reqres.vercel.app/)
 
 ## Prerequisites
 
