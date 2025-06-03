@@ -65,7 +65,14 @@ npm install
 npm run dev
 ```
 
-4. Open your browser and visit `http://localhost:3000`
+4. Create a .env file in the root folder and add:
+
+```bash
+VITE_BASE_URL: "https://reqres.in/api"
+VITE_API_KEY: "reqres-free-v1"
+```
+
+5. Open your browser and visit `http://localhost:3000`
 
 ## Configuration
 
